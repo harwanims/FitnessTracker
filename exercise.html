@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Recommendations</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1 class="fade-in">Exercise Recommendations</h1>
+    <div>
+        <h2>Select Your Exercises</h2>
+        <div>
+        <label for="timer-input">Set Timer (seconds):</label>
+        <input type="number" id="timer-input" placeholder="Enter time in seconds" style="width: 100px; margin-bottom: 10px; padding: 8px; border-radius: 5px; border: 1px solid #ccc; background: #1e1e1e; color: white;" />
+
+        <label for="exercise">Choose an exercise:</label>
+        <select id="exercise" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; background: #1e1e1e; color: white;"></select>
+
+        <button id="start-exercise">Start Timer</button>
+        <button id="stop-exercise" style="display: none;">Stop Timer</button>
+    </div>
+    <div id="timer" style="display: none;">
+        <h2>Timer: <span id="timer-display">00:00</span></h2>
+    </div>
+    <script>
+        let interval; // Declare interval variable
+
+        $(document).ready(function() {
+            // Example of how to call populateExercises based on a BMI category
+            const exampleBMICategory = 'Normal weight'; // Replace with actual logic
+            $.ajax({
+                url: '/populate_exercises',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ bmi_category: exampleBMICategory }),
+                success: function(exercises) {
+                    exercises.forEach(exercise => {
+                        $('#exercise').append(new Option(exercise, exercise));
+                    });
+                }
+            });
+
+            document.getElementById('start-exercise').addEventListener('click', function() {
+                const duration = parseInt(document.getElementById('timer-input').value) || 30; // Use user-defined duration or default to 30 seconds
+                startTimer(duration);
+            });
+
+            function startTimer(duration) {
+                let timer = duration, minutes, seconds;
+                const display = document.getElementById('timer-display'); 
+                document.getElementById('stop-exercise').style.display = 'inline'; // Show stop button
+                document.getElementById('timer').style.display = 'block';
+
+                interval = setInterval(function () {
+                    minutes = parseInt(timer / 60, 10);
+                    seconds = parseInt(timer % 60, 10);
+                    minutes = minutes < 10 ? "0" + minutes : minutes;
+                    seconds = seconds < 10 ? "0" + seconds : seconds;
+                    display.textContent = minutes + ":" + seconds;
+
+                    if (--timer < 0) {
+                        clearInterval(interval);
+                        display.textContent = "Time's up!";
+                    }
+                }, 1000);
+            }
+
+            document.getElementById('stop-exercise').addEventListener('click', function() {
+                clearInterval(interval); // Stop the timer
+                document.getElementById('stop-exercise').style.display = 'none'; // Hide stop button
+            });
+        });
+    </script>
+</body>
+</html>

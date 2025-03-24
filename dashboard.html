@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Fitness Tracker - Dashboard</title>
+        <link rel="stylesheet" href="styles/styles.css">
+
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+        <!-- GSAP for Animations -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+        
+        <!-- Main JavaScript -->
+        <script src="scripts/main.js" defer></script>
+        <script type="module" src="firebase.js"></script>
+    </head>
+    
+<body>
+    <h1 class="fade-in">Dashboard</h1>
+
+    <main class="container">
+        <div class="card">
+            <input type="number" id="weight" placeholder="Enter your weight (kg)" style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: #1e1e1e; color: white;" />
+            <input type="number" id="height" placeholder="Enter your height (m)" style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: #1e1e1e; color: white;" />
+
+            <button id="calculate-bmi">Calculate BMI</button>
+            <div id="bmi-result" style="margin-top: 20px; display: none;">
+                <h3>Your BMI is: <span id="bmi-value"></span></h3>
+                <h4 id="workout-recommendation" style="display: none;"></h4>
+            </div>
+        </div>
+    </main>
+
+    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <a href="exercise.html">
+            <button id="exercise-btn" style="width: 200px; height: 40px; margin-right: 10px; background-color: rgb(255, 255, 255); color: rgb(0, 0, 0); padding: 0; line-height: 40px;">Exercise</button>
+        </a>
+        <button id="logout-btn" style="width: 100px; height: 40px; background-color: red; color: white; padding: 0; line-height: 40px;">Logout</button>
+    </div>
+
+    <script>
+        const bmiButton = document.getElementById('calculate-bmi');
+        const bmiValue = document.getElementById('bmi-value');
+        const bmiResult = document.getElementById('bmi-result');
+        const workoutRecommendation = document.getElementById('workout-recommendation');
+
+        bmiButton.addEventListener('click', function() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            console.log("Weight:", weight);
+            console.log("Height:", height);
+
+            if (weight > 0 && height > 0) {
+                const bmi = weight / (height * height);
+                let category;
+                if (bmi < 18.5) {
+                    category = 'Underweight';
+                    workoutRecommendation.innerHTML = 'Recommended workouts: Strength training (e.g., weight lifting, resistance exercises).';
+                } else if (bmi >= 18.5 && bmi < 24.9) {
+                    category = 'Normal weight';
+                    workoutRecommendation.innerHTML = 'Recommended workouts: Balanced workouts (e.g., a mix of cardio and strength training).';
+                } else if (bmi >= 25 && bmi < 29.9) {
+                    category = 'Overweight';
+                    workoutRecommendation.innerHTML = 'Recommended workouts: Emphasis on cardio (e.g., walking, cycling) and gradual strength training.';
+                } else {
+                    category = 'Obesity';
+                    workoutRecommendation.innerHTML = 'Recommended workouts: Low-impact exercises (e.g., swimming, yoga) and gradual increase in activity.';
+                }
+                bmiValue.innerHTML = 'Your BMI is: ' + bmi.toFixed(2) + '<br>Your category is: ' + category; // Display both BMI and category
+
+                bmiResult.style.display = 'block'; // Show the BMI result section
+                workoutRecommendation.style.display = 'block'; // Show workout recommendations
+
+                // Save BMI to Firebase
+                db.collection('bmiResults').add({
+                    weight: weight,
+                    height: height,
+                    bmi: bmi
+                });
+
+            } else {
+                alert('Please enter valid weight and height.');
+            }
+        });
+    </script>
+</body>
+</html>
